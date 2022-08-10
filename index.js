@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import { validationResult } from "express-validator";
-
+import fs from "fs";
 
 
 import { registerValidation } from "./validations/auth.js";
@@ -12,7 +12,7 @@ import UserModel from './models/User.js'
 
 mongoose
   .connect(
-    "mongodb+srv://admin:wwwwww@cluster0.tqalqqr.mongodb.net/?retryWrites=true&w=majority"
+    "mongodb+srv://admin:wwwwww@cluster0.tqalqqr.mongodb.net/blog?retryWrites=true&w=majority"
   )
   .then(() => console.log("DB ok"))
   .catch((err) => console.log("DB error", err));
@@ -48,7 +48,7 @@ app.post('/auth/register', registerValidation,async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json(errors.array());
     }
-    
+     
 
     //шифровка пароля и соль
     const password = req.body.password;
