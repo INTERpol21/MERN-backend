@@ -48,7 +48,9 @@ app.post('/auth/register', registerValidation,async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json(errors.array());
     }
+    
 
+    //шифровка пароля и соль
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
@@ -59,6 +61,9 @@ app.post('/auth/register', registerValidation,async (req, res) => {
         avatarUrl: req.body.avatarUrl,
         passwordHash,
     });
+
+
+    const user = await doc.save();
 
     res.json({
         success: true,

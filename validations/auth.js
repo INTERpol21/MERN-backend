@@ -7,4 +7,3 @@ export const registerValidation = [
   body("fullName").isLength({ min: 2 }),
   body("avatarUrl").optional().isURL,
 ];
-
