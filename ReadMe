@@ -1,0 +1,25 @@
+Записываем в package.json, что бы node.js мог работать с импортом 
+"type": "module",
+
+начинаем работу с разрешения импорта node.js, получения и возвращения информации на сервере и запуска сервера на localhost 4444
+
+import express from "express";
+const app = express();
+///////////////////////
+
+npm install nodemon
+"start:dev": "nodemon index.js"(in package.json)
+npm run start:dev
+//////////////////////////////////////
+Установка и импорт JWT(Шифрование данных и авторизация пользователя  )
+$npm install jsonwebtoken 
+
+//////////////////////////////////////
+$ npm install mongoose
+
+Подключаем облако от Mongodb и создаем базу данных для имейлов, паролей 
+Создаем МОДЕЛЬ(форму регистрации) в models/User.js
+//////////////////////////////////////
+Устанавливаем библиотеку для проверки ввода, валидации
+$ npm install express-validator  
+Создаем validattions/auth.js и импортируем файл в index.js
