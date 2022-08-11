@@ -23,3 +23,10 @@ $ npm install mongoose
 Устанавливаем библиотеку для проверки ввода, валидации
 $ npm install express-validator  
 Создаем validattions/auth.js и импортируем файл в index.js
+
+
+
+
+
+
+
