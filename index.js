@@ -1,14 +1,18 @@
 import express from "express";
-import jwt from 'jsonwebtoken';
-import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-import { validationResult } from "express-validator";
 import fs from "fs";
 
+import {
+  registerValidation,
+  loginValidation,
+  postCreateValidation,
+} from "./validations.js";
+import checkAuth from './utils/checkAuth.js';
 
-import { registerValidation } from "./validations/auth.js";
 
-import UserModel from './models/User.js'
+import * as UserController from "./controllers/UserController.js";
+import * as PostController from "./controllers/PostController.js";
+
 
 mongoose
   .connect(
@@ -19,74 +23,23 @@ mongoose
 
 
 
-
-
 const app = express();
 //создаем использования логики express в формате json
 app.use(express.json());
 
-// //req то что прислал клиент //res возвращаем клиенту
-// app.get("/", (req, res) => {
-//   res.send("Hello World!");
-// });
 
-
-
-
+app.post("/auth/login",loginValidation, UserController.login);
 //Регистрация пользователя с ловлей ошибок  
-app.post('/auth/register', registerValidation, async (req, res) =>
-{
-  //Отправляем запрос на '/auth/register' проверяем есть ли там registerValidation, если есть то выполняем функцию дальше
-  try {
-    //Вытаскиваем все из запроса и передаем все ошибки
-    const errors = validationResult(req);
-    //Если все же ошибки есть, то возвращаем ответ 400
-    if (!errors.isEmpty()) {
-      return res.status(400).json(errors.array());
-    }
+app.post('/auth/register', registerValidation, UserController.register);
+//функция checkAuth решает, нужно ли проходить дальше, если да, то с помощью next, переходит к (req,res) => ......
+app.get('/auth/me', checkAuth, UserController.getMe);
 
-    //шифровка пароля и соль
-    const password = req.body.password;
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, salt);
+// app.get("/posts", checkAuth, PostController.getAll); //Запрос на передачу всех статей
+// app.get("/posts/:id", checkAuth, PostController.getOne); //Запрос на передачу одной статьи
+app.post("/posts", checkAuth, postCreateValidation, PostController.create); //Запрос на создание
+// app.delete("/posts", checkAuth, PostController.remove); //Запрос на удаление
+// app.patch("/posts", checkAuth, PostController.update); //Запрос на обновление
 
-    const doc = new UserModel({
-      email: req.body.email,
-      fullName: req.body.fullName,
-      avatarUrl: req.body.avatarUrl,
-      passwordHash: hash,
-    });
-    //Сохраняем документ
-    const user = await doc.save();
-
-    //Пишем токен и удаление его через 30 дней
-    const token = jwt.sign(
-      {
-        _id: user._id,
-      },
-      "secret123",
-      {
-        expiresIn: "30d",
-      }
-    );
-
-    //С помощью деструктиризации вытаскиваем и не используем хеш пароля
-    const { passwordHash, ...userData } = user._doc;
-
-    //вытаскиваем только документ без пароля из БД
-    res.json({
-      ...userData,
-      token,
-    });
-
-    //Выдаем 500 ошибку
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      massage: "Не удалось зарегистрироваться",
-    });
-  }
-});
 
 app.listen(4444, (err) => {
   if (err) {
@@ -95,3 +48,4 @@ app.listen(4444, (err) => {
 
   console.log("Server OK");
 });
+
