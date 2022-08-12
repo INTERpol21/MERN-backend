@@ -1,17 +1,17 @@
 import express from "express";
 import mongoose from "mongoose";
 import fs from "fs";
+import multer from "multer";
 
 import {
   registerValidation,
   loginValidation,
   postCreateValidation,
 } from "./validations.js";
-import checkAuth from './utils/checkAuth.js';
+import { handleValidationErrors, checkAuth } from "./utils/index.js";
+import {UserController,PostController} from "./controllers/index.js";
 
 
-import * as UserController from "./controllers/UserController.js";
-import * as PostController from "./controllers/PostController.js";
 
 
 mongoose
@@ -26,19 +26,65 @@ mongoose
 const app = express();
 //создаем использования логики express в формате json
 app.use(express.json());
+//Показываем express как искать файлы
+app.use('/uploads', express.static('uploads'))
+
+//Создаем хранилище для работы с картинками 
+const storage = multer.diskStorage({
+    //путь для сохранения 
+    destination: (_, __, cb) => {
+        cb(null, 'uploads')
+    },
+    //перед сохранениям, называем файл
+    filename: (_, file, cb) => {
+        cb(null, file.originalname)
+    },
+});
+
+const upload = multer({ storage });
 
 
-app.post("/auth/login",loginValidation, UserController.login);
+
+app.post(
+  "/auth/login",
+  loginValidation,
+  handleValidationErrors,
+  UserController.login
+);
 //Регистрация пользователя с ловлей ошибок  
-app.post('/auth/register', registerValidation, UserController.register);
+app.post(
+  "/auth/register",
+  registerValidation,
+  handleValidationErrors,
+  UserController.register
+);
 //функция checkAuth решает, нужно ли проходить дальше, если да, то с помощью next, переходит к (req,res) => ......
 app.get('/auth/me', checkAuth, UserController.getMe);
 
-// app.get("/posts", checkAuth, PostController.getAll); //Запрос на передачу всех статей
-// app.get("/posts/:id", checkAuth, PostController.getOne); //Запрос на передачу одной статьи
-app.post("/posts", checkAuth, postCreateValidation, PostController.create); //Запрос на создание
-// app.delete("/posts", checkAuth, PostController.remove); //Запрос на удаление
-// app.patch("/posts", checkAuth, PostController.update); //Запрос на обновление
+
+app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
+    res.json({
+        url: `/upload/${req.file.originalname}`,
+    });
+});
+
+app.get("/posts", PostController.getAll); //Запрос на передачу всех статей
+app.get("/posts/:id", PostController.getOne); //Запрос на передачу одной статьи
+app.post(
+  "/posts",
+  checkAuth,
+  postCreateValidation,
+  handleValidationErrors,
+  PostController.create
+); //Запрос на создание
+app.delete("/posts/:id", checkAuth, PostController.remove); //Запрос на удаление
+app.patch(
+  "/posts/:id",
+  checkAuth,
+  postCreateValidation,
+  handleValidationErrors,
+  PostController.update
+); //Запрос на обновление
 
 
 app.listen(4444, (err) => {

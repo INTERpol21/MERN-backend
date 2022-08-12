@@ -7,13 +7,7 @@ import UserModel from "../models/User.js";
 export const register = async (req, res) => {
   //Отправляем запрос на '/auth/register' проверяем есть ли там registerValidation, если есть то выполняем функцию дальше
   try {
-    //Вытаскиваем все из запроса и передаем все ошибки
-    const errors = validationResult(req);
-    //Если все же ошибки есть, то возвращаем ответ 400
-    if (!errors.isEmpty()) {
-      return res.status(400).json(errors.array());
-    }
-
+  
     //шифровка пароля и соль
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
