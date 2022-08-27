@@ -1,7 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
-import fs from "fs";
 import multer from "multer";
+//импорт библиотеки для исправления ошибки CORS получения данных с сервера localhost3000 на localhost4000 !!!!
+import cors from 'cors';
 
 import {
   registerValidation,
@@ -16,7 +17,7 @@ import {UserController,PostController} from "./controllers/index.js";
 
 mongoose
   .connect(
-    "mongodb+srv://admin:wwwwww@cluster0.tqalqqr.mongodb.net/blog?retryWrites=true&w=majority"
+    "mongodb+srv://admin:123@cluster0.5ehvepf.mongodb.net/blog?retryWrites=true&w=majority"
   )
   .then(() => console.log("DB ok"))
   .catch((err) => console.log("DB error", err));
@@ -26,6 +27,8 @@ mongoose
 const app = express();
 //создаем использования логики express в формате json
 app.use(express.json());
+//библиотеки для исправления ошибки CORS получения данных с сервера localhost3000 на localhost4000 !!!!
+app.use(cors());
 //Показываем express как искать файлы
 app.use('/uploads', express.static('uploads'))
 
