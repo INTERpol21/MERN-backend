@@ -27,7 +27,7 @@ export const register = async (req, res) => {
       },
       "secret123",
       {
-        expiresIn: "300d",
+        expiresIn: "30d",
       }
     );
 
@@ -76,7 +76,7 @@ export const login = async (req, res) => {
       },
       "secret123",
       {
-        expiresIn: "30d0",
+        expiresIn: "30d",
       }
     );
     //С помощью деструктиризации вытаскиваем и не используем хеш пароля
