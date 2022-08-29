@@ -1,13 +1,11 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-import { validationResult } from "express-validator";
 import UserModel from "../models/User.js";
 
 export const register = async (req, res) => {
   //Отправляем запрос на '/auth/register' проверяем есть ли там registerValidation, если есть то выполняем функцию дальше
   try {
-  
     //шифровка пароля и соль
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
@@ -29,7 +27,7 @@ export const register = async (req, res) => {
       },
       "secret123",
       {
-        expiresIn: "30d",
+        expiresIn: "300d",
       }
     );
 
@@ -78,7 +76,7 @@ export const login = async (req, res) => {
       },
       "secret123",
       {
-        expiresIn: "30d",
+        expiresIn: "30d0",
       }
     );
     //С помощью деструктиризации вытаскиваем и не используем хеш пароля
@@ -103,16 +101,17 @@ export const getMe = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        message: " Пользователь не найден",
+        message: "Пользователь не найден",
       });
     }
 
     const { passwordHash, ...userData } = user._doc;
+
     res.json(userData);
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      massage: "Нет доступа",
+      message: "Нет доступа",
     });
   }
 };

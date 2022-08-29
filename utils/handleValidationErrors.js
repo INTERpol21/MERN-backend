@@ -6,7 +6,7 @@ export default (req, res, next) => {
   //Если все же ошибки есть, то возвращаем ответ 400
   if (!errors.isEmpty()) {
     return res.status(400).json(errors.array());
-    }
-    
-    next();
-}
+  }
+
+  next();
+};

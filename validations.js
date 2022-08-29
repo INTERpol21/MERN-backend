@@ -8,7 +8,7 @@ export const loginValidation = [
   }),
 ];
 
-//Валидация на регистрацию 
+//Валидация на регистрацию
 export const registerValidation = [
   body("email", "Неверный формат почты").isEmail(),
   body("password", "Пароль должен быть минимум 5 символов").isLength({
@@ -18,7 +18,7 @@ export const registerValidation = [
   body("avatarUrl", "Неверная ссылка на аватарку").optional().isURL(),
 ];
 
-//Валидация на Пост 
+//Валидация на Пост
 export const postCreateValidation = [
   body("title", "Введите заголовок статьи").isLength({ min: 3 }).isString(),
   body("text", "Введите текст статьи").isLength({ min: 3 }).isString(),

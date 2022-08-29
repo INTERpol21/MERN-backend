@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import multer from "multer";
 //импорт библиотеки для исправления ошибки CORS получения данных с сервера localhost3000 на localhost4000 !!!!
-import cors from 'cors';
+import cors from "cors";
 
 import {
   registerValidation,
@@ -10,10 +10,7 @@ import {
   postCreateValidation,
 } from "./validations.js";
 import { handleValidationErrors, checkAuth } from "./utils/index.js";
-import {UserController,PostController} from "./controllers/index.js";
-
-
-
+import { UserController, PostController } from "./controllers/index.js";
 
 mongoose
   .connect(
@@ -22,31 +19,31 @@ mongoose
   .then(() => console.log("DB ok"))
   .catch((err) => console.log("DB error", err));
 
-
-
 const app = express();
+
+//Создаем хранилище для работы с картинками
+const storage = multer.diskStorage({
+  //путь для сохранения
+  destination: (_, __, cb) => {
+    if (!fs.existsSync("uploads")) {
+      fs.mkdirSync("uploads");
+    }
+    cb(null, "uploads");
+  },
+  //перед сохранениям, называем файл
+  filename: (_, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
 //создаем использования логики express в формате json
 app.use(express.json());
 //библиотеки для исправления ошибки CORS получения данных с сервера localhost3000 на localhost4000 !!!!
 app.use(cors());
 //Показываем express как искать файлы
-app.use('/uploads', express.static('uploads'))
-
-//Создаем хранилище для работы с картинками 
-const storage = multer.diskStorage({
-    //путь для сохранения 
-    destination: (_, __, cb) => {
-        cb(null, 'uploads')
-    },
-    //перед сохранениям, называем файл
-    filename: (_, file, cb) => {
-        cb(null, file.originalname)
-    },
-});
-
-const upload = multer({ storage });
-
-
+app.use("/uploads", express.static("uploads"));
 
 app.post(
   "/auth/login",
@@ -54,7 +51,7 @@ app.post(
   handleValidationErrors,
   UserController.login
 );
-//Регистрация пользователя с ловлей ошибок  
+//Регистрация пользователя с ловлей ошибок
 app.post(
   "/auth/register",
   registerValidation,
@@ -62,39 +59,40 @@ app.post(
   UserController.register
 );
 //функция checkAuth решает, нужно ли проходить дальше, если да, то с помощью next, переходит к (req,res) => ......
-app.get('/auth/me', checkAuth, UserController.getMe);
+app.get("/auth/me", checkAuth, UserController.getMe);
 
-
-app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
-    res.json({
-        url: `/upload/${req.file.originalname}`,
-    });
+app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
+  res.json({
+    url: `/uploads/${req.file.originalname}`,
+  });
 });
-
+app.get("/tags", PostController.getLastTags);
 app.get("/posts", PostController.getAll); //Запрос на передачу всех статей
+app.get("/posts/tags", PostController.getLastTags);
 app.get("/posts/:id", PostController.getOne); //Запрос на передачу одной статьи
+//Запрос на создание
 app.post(
   "/posts",
   checkAuth,
   postCreateValidation,
   handleValidationErrors,
   PostController.create
-); //Запрос на создание
-app.delete("/posts/:id", checkAuth, PostController.remove); //Запрос на удаление
+);
+//Запрос на удаление
+app.delete("/posts/:id", checkAuth, PostController.remove);
+//Запрос на обновление
 app.patch(
   "/posts/:id",
   checkAuth,
   postCreateValidation,
   handleValidationErrors,
   PostController.update
-); //Запрос на обновление
+);
 
-
-app.listen(4444, (err) => {
+app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
     return console.log(err);
   }
 
   console.log("Server OK");
 });
-
